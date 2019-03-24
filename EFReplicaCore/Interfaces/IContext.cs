@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EFReplicaCore.Models.Helpers;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -11,6 +12,9 @@ namespace EFReplicaCore.Interfaces
         bool Delete(T obj);
         bool Update(T obj);
         bool Insert(T obj);
-        List<T> GetWithFilter(List<KeyValuePair<string, object>> filters);
+        List<T> GetWithFilter(List<string> selects = null,
+            List<ColumnFilter> filters = null,
+            List<KeyValuePair<string, string>> order = null,
+            List<string> group = null);
     }
 }

@@ -1,5 +1,7 @@
 ﻿using EFReplicaCore.Interfaces;
 using EFReplicaCore.Models.Context;
+using EFReplicaCore.Models.Exceptions;
+using EFReplicaCore.Models.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,39 +21,51 @@ namespace EFReplicaCore.Models
 
         public void Insert(T obj)
         {
-            this.context.Insert(obj);
+            if (obj.IsValid())
+                this.context.Insert(obj);
+            else
+                throw new InvalidModelException("Model is invalid");
         }
 
         public void Update(T obj)
         {
-            this.context.Update(obj);
+            if (obj.IsValid())
+                this.context.Update(obj);
+            else
+                throw new InvalidModelException("Model is invalid");
         }
 
         public void Delete(T obj)
         {
-            this.context.Delete(obj);
+            if (obj.IsValid())
+                this.context.Delete(obj);
+            else
+                throw new InvalidModelException("Model is invalid");
         }
 
         public void Delete(long id)
         {
-            Delete(GetWithFilter(
-                new List<KeyValuePair<string, object>>()
+            Delete(GetWithFilter(filters:
+                new List<ColumnFilter>()
                 {
-                    new KeyValuePair<string, object>("id", id)
+                    new ColumnFilter("Id", id)
                 }).FirstOrDefault());
         }
 
-        public List<T> GetWithFilter(List<KeyValuePair<string, object>> filters)
+        public List<T> GetWithFilter(List<string> selects = null,
+            List<ColumnFilter> filters = null,
+            List<KeyValuePair<string, string>> order = null,
+            List<string> group = null)
         {
-            return this.context.GetWithFilter(filters);
+            return this.context.GetWithFilter(selects, filters, order, group);
         }
 
         public T GetById(long id)
         {
-            return GetWithFilter(
-                new List<KeyValuePair<string, object>>()
+            return GetWithFilter(filters: 
+                new List<ColumnFilter>()
                 {
-                    new KeyValuePair<string, object>("Id", id)
+                    new ColumnFilter("Id", id)
                 }).FirstOrDefault();
         }
     }

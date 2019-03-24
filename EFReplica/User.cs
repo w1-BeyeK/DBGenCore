@@ -15,6 +15,7 @@ namespace EFReplica
         [Property]
         public string Password { get; set; }
 
+        [Property]
         public DateTime BirthDate { get; set; }
     }
 }

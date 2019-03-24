@@ -7,8 +7,25 @@ namespace EFReplicaCore.Models
 {
     public class Entity
     {
-        public List<KeyValuePair<string, string>> Changes = new List<KeyValuePair<string, string>>();
+        [Property]
+        [AutoIncrement]
         public long Id { get; set; }
+
+        public bool IsValid()
+        {
+            return true;
+        }
+
+        public List<KeyValuePair<string, object>> ToKeyValue()
+        {
+            List<KeyValuePair<string, object>> items = new List<KeyValuePair<string, object>>();
+            foreach (PropertyInfo prop in GetType().GetProperties())
+            {
+                if(Attribute.IsDefined(prop, typeof(Property)) && !Attribute.IsDefined(prop, typeof(AutoIncrement)))
+                    items.Add(new KeyValuePair<string, object>(prop.Name, prop.GetValue(this, null)));
+            }
+            return items;
+        }
 
         public object GetPrimaryKeyValue()
         {
@@ -58,11 +75,6 @@ namespace EFReplicaCore.Models
             return new List<PropertyInfo>(GetType().GetProperties())
                 // Then search for the required attribute
                 .FindAll(t => Attribute.IsDefined(t, typeof(Type)));
-        }
-
-        public void LogChange(string property, string val)
-        {
-            Changes.Add(new KeyValuePair<string, string>(property, val));
         }
     }
 }

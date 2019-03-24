@@ -1,4 +1,5 @@
 ﻿using EFReplicaCore.Enums;
+using EFReplicaCore.Models.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -10,14 +11,18 @@ namespace EFReplicaCore.Interfaces
         void SetTable(string name);
 
         string GetSelectQuery(List<string> selects = null,
-            List <KeyValuePair<string, object>> filters = null,
+            List<ColumnFilter> filters = null,
             List<KeyValuePair<string, string>> order = null,
             List<string> group = null);
-        string FilterToWhere(List<KeyValuePair<string, object>> filters);
+        string GetInsertQuery(List<KeyValuePair<string, object>> pairs);
+        string GetUpdateQuery(List<KeyValuePair<string, object>> pairs);
+        string GetDeleteQuery(List<ColumnFilter> filters);
+
+        string FilterToWhere(List<ColumnFilter> filters);
         string FilterToSelect(List<string> filters);
         string FilterToOrder(List<KeyValuePair<string, string>> filters);
         string FilterToGroup(List<string> filters);
 
-        string ParseFilter(KeyValuePair<string, object> filter);
+        string ParseFilter(ColumnFilter filter);
     }
 }

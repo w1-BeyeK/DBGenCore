@@ -2,6 +2,7 @@
 using EFReplicaCore.Interfaces;
 using EFReplicaCore.Models.Builders;
 using EFReplicaCore.Models.Handlers;
+using EFReplicaCore.Models.Helpers;
 using EFReplicaCore.Models.Parsers;
 using System;
 using System.Collections.Generic;
@@ -41,14 +42,26 @@ namespace EFReplicaCore.Models.Context
 
         public override void DeleteInternal(T obj)
         {
-            //string query = builder.GetDeleteQuery(obj);
+
+            string query = builder.GetDeleteQuery(obj.ToKeyValue());
+            try
+            {
+                bool success = handler.ExecuteCommand(query);
+            }
+            catch (Exception e)
+            {
+                // Something bad happened
+            }
         }
 
-        public override List<T> GetWithFilterInternal(List<KeyValuePair<string, object>> filters)
+        public override List<T> GetWithFilterInternal(List<string> selects = null,
+            List<ColumnFilter> filters = null,
+            List<KeyValuePair<string, string>> order = null,
+            List<string> group = null)
         {
             try
             {
-                string query = builder.GetSelectQuery(filters: filters);
+                string query = builder.GetSelectQuery(selects, filters, order, group);
                 object result = handler.ExecuteSelect(query);
 
                 List<T> items = new List<T>();
@@ -68,8 +81,7 @@ namespace EFReplicaCore.Models.Context
 
         public override void InsertInternal(T obj)
         {
-            //string query = builder.GetQuery(GetProperties(obj), QueryType.Insert);
-            string query = "";
+            string query = builder.GetInsertQuery(obj.ToKeyValue());
             try
             {
                 bool success = handler.ExecuteCommand(query);

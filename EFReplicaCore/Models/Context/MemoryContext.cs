@@ -1,4 +1,5 @@
 ﻿using EFReplicaCore.Interfaces;
+using EFReplicaCore.Models.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,19 +22,22 @@ namespace EFReplicaCore.Models.Context
             return Items.FirstOrDefault(i => i.GetPrimaryKeyValue() == key);
         }
 
-        public override List<T> GetWithFilterInternal(List<KeyValuePair<string, object>> filters = null)
+        public override List<T> GetWithFilterInternal(List<string> selects = null, 
+            List<ColumnFilter> filters = null, 
+            List<KeyValuePair<string, string>> order = null, 
+            List<string> group = null)
         {
             if (filters == null || filters.Count == 0)
                 return Items;
 
             List<T> items = new List<T>();
-            foreach (T item in Items)
-                foreach (KeyValuePair<string, object> filter in filters)
-                {
-                    object val = item.GetValueByProperty(filter.Key);
-                    if (filter.Value.Equals(val))
-                        items.Add(item);
-                }
+            //foreach (T item in Items)
+                //foreach (KeyValuePair<string, object> filter in filters)
+                //{
+                //    object val = item.GetValueByProperty(filter.Key);
+                //    if (filter.Value.Equals(val))
+                //        items.Add(item);
+                //}
 
             return items;
         }

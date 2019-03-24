@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EFReplicaCore.Models.Helpers;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -36,18 +37,25 @@ namespace EFReplicaCore.Models.Context
                 return new List<T>();
             }
         }
-        public List<T> GetWithFilter(List<KeyValuePair<string, object>> filters)
+
+        public List<T> GetWithFilter(List<string> selects = null,
+            List<ColumnFilter> filters = null,
+            List<KeyValuePair<string, string>> order = null,
+            List<string> group = null)
         {
             try
             {
-                return GetWithFilterInternal(filters);
+                return GetWithFilterInternal(selects, filters, order, group);
             }
             catch(Exception)
             {
                 return new List<T>();
             }
         }
-        public abstract List<T> GetWithFilterInternal(List<KeyValuePair<string, object>> filters = null);
+        public abstract List<T> GetWithFilterInternal(List<string> selects = null,
+            List<ColumnFilter> filters = null,
+            List<KeyValuePair<string, string>> order = null,
+            List<string> group = null);
 
         public T GetByPrimaryKeyValue(object key)
         {
@@ -70,7 +78,7 @@ namespace EFReplicaCore.Models.Context
                 InsertInternal(obj);
                 return true;
             }
-            catch(Exception)
+            catch(Exception e)
             {
                 return false;
             }

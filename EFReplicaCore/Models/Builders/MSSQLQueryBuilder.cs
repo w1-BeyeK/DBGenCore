@@ -1,5 +1,6 @@
 ﻿using EFReplicaCore.Enums;
 using EFReplicaCore.Interfaces;
+using EFReplicaCore.Models.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -18,6 +19,11 @@ namespace EFReplicaCore.Models.Builders
         public MSSQLQueryBuilder()
         { }
 
+        public void SetTable(string table)
+        {
+            this.table = table;
+        }
+
         private static Dictionary<string, string> placeHolders = new Dictionary<string, string>()
         {
             { "select", "SELECT" },
@@ -29,11 +35,12 @@ namespace EFReplicaCore.Models.Builders
             { "and", "AND" },
             { "or", "OR" }
         };
-        
-        public string FilterToWhere(List<KeyValuePair<string, object>> filters)
+
+        #region filterparser
+        public string FilterToWhere(List<ColumnFilter> filters)
         {
             string query = "";
-            foreach(KeyValuePair<string, object> filter in filters)
+            foreach(ColumnFilter filter in filters)
             {
                 if (query.Length > 0)
                     query += $" {placeHolders["and"]} ";
@@ -43,16 +50,20 @@ namespace EFReplicaCore.Models.Builders
             return $"{placeHolders["where"]} {query}";
         }
 
-        public string ParseFilter(KeyValuePair<string, object> filter)
+        public string ParseFilter(ColumnFilter filter)
         {
-            return $"{filter.Key} = '{filter.Value}'";
+            switch(filter.Type)
+            {
+                default:
+                case FilterType.Equals:
+                    return $"{filter.Column} = '{filter.Value.ToString()}'";
+                case FilterType.Like:
+                    return $"{filter.Column} LIKE '%{filter.Value.ToString()}%'";
+                case FilterType.NotLike:
+                    return $"{filter.Column} NOT LIKE '%{filter.Value.ToString()}%'";
+            }
         }
-
-        public void SetTable(string table)
-        {
-            this.table = table;
-        }
-
+        
         public string FilterToSelect(List<string> filters)
         {
             string query = "";
@@ -90,8 +101,13 @@ namespace EFReplicaCore.Models.Builders
 
             return $"{placeHolders["order"]} {query}";
         }
+        #endregion
 
-        public string GetSelectQuery(List<string> selects = null, List<KeyValuePair<string, object>> filters = null, List<KeyValuePair<string, string>> order = null, List<string> group = null)
+
+        public string GetSelectQuery(List<string> selects = null,
+            List<ColumnFilter> filters = null,
+            List<KeyValuePair<string, string>> order = null,
+            List<string> group = null)
         {
             string query = "";
 
@@ -110,6 +126,36 @@ namespace EFReplicaCore.Models.Builders
                 query += FilterToGroup(group);
 
             return query;
+        }
+
+        public string GetInsertQuery(List<KeyValuePair<string, object>> pairs)
+        {
+            string query = $"insert into {table}(@fields) values (@values)";
+            string fields = "";
+            string values = "";
+
+            foreach(KeyValuePair<string, object> field in pairs)
+            {
+                if (!string.IsNullOrWhiteSpace(fields))
+                    fields += ",";
+                fields += field.Key;
+
+                if (!string.IsNullOrWhiteSpace(values))
+                    values += ",";
+                values += $"'{field.Value.ToString()}'";
+            }
+
+            return query.Replace("@fields", fields).Replace("@values", values);
+        }
+
+        public string GetDeleteQuery(List<ColumnFilter> filters)
+        {
+            return $"delete from {table} {FilterToWhere(filters)}";
+        }
+
+        public string GetUpdateQuery(List<KeyValuePair<string, object>> pairs)
+        {
+            throw new NotImplementedException();
         }
     }
 }
