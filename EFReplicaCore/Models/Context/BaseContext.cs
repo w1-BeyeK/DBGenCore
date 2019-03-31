@@ -10,22 +10,6 @@ namespace EFReplicaCore.Models.Context
 {
     public abstract class BaseContext<T> where T : Entity
     {
-        public List<KeyValuePair<string, object>> GetProperties(T obj)
-        {
-            List<KeyValuePair<string, object>> properties = new List<KeyValuePair<string, object>>();
-            PropertyInfo[] props = obj.GetType().GetProperties();
-
-            foreach(PropertyInfo prop in props)
-            {
-                string name = prop.Name;
-                object val = prop.GetValue(prop);
-
-                properties.Add(new KeyValuePair<string, object>(name, val));
-            }
-
-            return properties;
-        }
-
         public List<T> GetAll()
         {
             try
@@ -92,7 +76,7 @@ namespace EFReplicaCore.Models.Context
                 UpdateInternal(obj);
                 return true;
             }
-            catch (Exception)
+            catch (Exception e)
             {
                 return false;
             }
@@ -106,7 +90,7 @@ namespace EFReplicaCore.Models.Context
                 DeleteInternal(obj);
                 return true;
             }
-            catch (Exception)
+            catch (Exception e)
             {
                 return false;
             }

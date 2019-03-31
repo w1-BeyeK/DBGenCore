@@ -27,6 +27,8 @@ namespace EFReplicaCore.Models.Builders
         private static Dictionary<string, string> placeHolders = new Dictionary<string, string>()
         {
             { "select", "SELECT" },
+            { "update", "UPDATE"},
+            { "delete", "DELETE"},
             { "from", "FROM" },
             { "where", "WHERE" },
             { "order", "ORDER BY" },
@@ -111,7 +113,7 @@ namespace EFReplicaCore.Models.Builders
         {
             string query = "";
 
-            if (selects == null)
+            if (selects == null || selects.Count < 1)
                 query += $"{placeHolders["select"]} * from {table} ";
             else
                 query += $"{placeHolders["select"]} {FilterToSelect(selects)} from {table} ";
@@ -153,9 +155,22 @@ namespace EFReplicaCore.Models.Builders
             return $"delete from {table} {FilterToWhere(filters)}";
         }
 
-        public string GetUpdateQuery(List<KeyValuePair<string, object>> pairs)
+        public string GetUpdateQuery(List<KeyValuePair<string, object>> pairs, List<ColumnFilter> filters)
         {
-            throw new NotImplementedException();
+            if (filters.Count < 1)
+                throw new ArgumentOutOfRangeException("There must be atleast 1 filter");
+
+            string query = $"{placeHolders["update"]} {table} set @fields @where";
+            string fields = "";
+
+            foreach(KeyValuePair<string, object> pair in pairs)
+            {
+                if (!string.IsNullOrWhiteSpace(fields))
+                    fields += ",";
+                fields += $"{pair.Key} = '{pair.Value}'";
+            }
+
+            return query.Replace("@fields", fields).Replace("@where", FilterToWhere(filters));
         }
     }
 }

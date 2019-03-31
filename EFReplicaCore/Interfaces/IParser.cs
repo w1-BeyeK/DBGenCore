@@ -1,12 +1,13 @@
-﻿using System;
+﻿using EFReplicaCore.Models;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace EFReplicaCore.Interfaces
 {
-    public interface IParser<T>
+    public interface IParser
     {
-        T Parse(object raw);
-        bool TryParse(object raw, out T result);
+        object Parse<T>(object raw) where T : Entity;
+        bool TryParse<T>(object raw, out T result) where T : Entity;
     }
 }

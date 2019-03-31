@@ -15,25 +15,25 @@ namespace EFReplicaCore.Models.Context
 {
     public class MSSQLContext<T> : BaseContext<T>, IContext<T> where T : Entity
     {
-        private readonly IQueryBuilder builder;
-        private readonly IHandler handler;
+        protected readonly IQueryBuilder builder;
+        protected readonly IHandler handler;
 
-        private readonly IParser<T> parser;
+        protected readonly IParser parser;
 
+        private readonly Converter converter = new Converter();
         private readonly string connection;
 
-        public MSSQLContext(IQueryBuilder builder, IHandler handler, IParser<T> parser, string conn)
+        public MSSQLContext(IQueryBuilder builder, IHandler handler, IParser parser, string conn, string table)
         {
             this.builder = builder;
             this.handler = handler;
             this.parser = parser;
             connection = conn;
+            this.builder.SetTable(table);
         }
 
-        public MSSQLContext(string conn): this(new MSSQLQueryBuilder(), new MSSQLDatabaseHandler(conn), new DataRowParser<T>(), conn)
-        {
-            this.builder.SetTable("Users");
-        }
+        public MSSQLContext(string conn, string table): this(new MSSQLQueryBuilder(), new MSSQLDatabaseHandler(conn), new DataRowParser(), conn, table)
+        { }
 
         protected string GetTableName(T obj)
         {
@@ -43,7 +43,7 @@ namespace EFReplicaCore.Models.Context
         public override void DeleteInternal(T obj)
         {
 
-            string query = builder.GetDeleteQuery(obj.ToKeyValue());
+            string query =  builder.GetDeleteQuery(converter.KeyValueToColumnFilters(obj.GetPrimaryKeyValue()));
             try
             {
                 bool success = handler.ExecuteCommand(query);
@@ -81,7 +81,7 @@ namespace EFReplicaCore.Models.Context
 
         public override void InsertInternal(T obj)
         {
-            string query = builder.GetInsertQuery(obj.ToKeyValue());
+            string query = builder.GetInsertQuery(obj.ToKeyValue(false));
             try
             {
                 bool success = handler.ExecuteCommand(query);
@@ -94,7 +94,19 @@ namespace EFReplicaCore.Models.Context
 
         public override void UpdateInternal(T obj)
         {
-            throw new NotImplementedException();
+            List<ColumnFilter> filters = new List<ColumnFilter>();
+            //foreach (var pair in oldObj.ToKeyValue())
+            //    filters.Add(new ColumnFilter(pair.Key, pair.Value));
+
+            string query = builder.GetUpdateQuery(obj.ToKeyValue(false), converter.KeyValueToColumnFilters(obj.GetPrimaryKeyValue()));
+            try
+            {
+                bool success = handler.ExecuteCommand(query);
+            }
+            catch(Exception e)
+            {
+                // Something bad happened
+            }
         }
 
         public override T GetByPrimaryKeyValueInternal(object key)

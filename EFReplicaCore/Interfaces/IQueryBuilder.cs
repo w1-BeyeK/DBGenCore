@@ -15,7 +15,7 @@ namespace EFReplicaCore.Interfaces
             List<KeyValuePair<string, string>> order = null,
             List<string> group = null);
         string GetInsertQuery(List<KeyValuePair<string, object>> pairs);
-        string GetUpdateQuery(List<KeyValuePair<string, object>> pairs);
+        string GetUpdateQuery(List<KeyValuePair<string, object>> pairs, List<ColumnFilter> filters);
         string GetDeleteQuery(List<ColumnFilter> filters);
 
         string FilterToWhere(List<ColumnFilter> filters);

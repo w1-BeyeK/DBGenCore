@@ -38,7 +38,9 @@ namespace EFReplicaCore.Models
         public void Delete(T obj)
         {
             if (obj.IsValid())
+            {
                 this.context.Delete(obj);
+            }
             else
                 throw new InvalidModelException("Model is invalid");
         }
