@@ -172,5 +172,11 @@ namespace EFReplicaCore.Models.Builders
 
             return query.Replace("@fields", fields).Replace("@where", FilterToWhere(filters));
         }
+
+        public string GetTableExistsQuery(string table)
+        {
+            string query = "";
+            return query;
+        }
     }
 }

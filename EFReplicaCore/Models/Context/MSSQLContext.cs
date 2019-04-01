@@ -113,5 +113,10 @@ namespace EFReplicaCore.Models.Context
         {
             throw new NotImplementedException();
         }
+
+        public bool CanPersist(T obj)
+        {
+            string query = builder.GetTableExistsQuery(obj.GetType().Name + "s");
+        }
     }
 }

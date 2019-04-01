@@ -12,26 +12,29 @@ namespace EFReplica
 {
     class Program
     {
-        static Repository<User> repo;
-        static Repository<Order> orderRepo;
-
         static void Main(string[] args)
         {
             // VPN conn
             string connection = "Server=mssql.fhict.local;Database=dbi409368;User Id=dbi409368;Password=Heclepra9;";
             // Local conn
             //string connection = "Data Source=DESKTOP-1JEGGKM\\SQLEXPRESS;Initial Catalog=DBGenCore;Integrated Security=true;";
-            repo = new Repository<User>(new MSSQLContext<User>(connection, "Users"));
-            orderRepo = new Repository<Order>(new MSSQLContext<Order>(connection, "Orders"));
+
+            MSSQLDatabase database = new MSSQLDatabase(connection);
+            database.AddRepository<User>();
+
+            Repository<User> repo = database.GetRepository("UserRepository") as Repository<User>;
+
+            MSSQLDatabase database2 = new MSSQLDatabase(connection);
+            var x = database.GetRepository("UserRepository") as Repository<User>;
 
             // Insert test
-            //repo.Insert(new User()
-            //{
-            //    Name = "TEST USER 2.0",
-            //    BirthDate = DateTime.Now,
-            //    Email = "test@test.nu",
-            //    Password = "OnveiligPassword"
-            //});
+            repo.Insert(new User()
+            {
+                Name = "TEST USER 2.0 AAAA",
+                BirthDate = DateTime.Now,
+                Email = "test@test.nu",
+                Password = "OnveiligPassword"
+            });
 
             // Update test
             //repo.Update(new User()
@@ -45,10 +48,10 @@ namespace EFReplica
 
             // Delete test
             // By Id
-            repo.Delete(new User()
-            {
-                Id = 1002
-            });
+            //repo.Delete(new User()
+            //{
+            //    Id = 1002
+            //});
             // By custom object
             //repo.Delete(new User()
             //{

@@ -16,5 +16,7 @@ namespace EFReplicaCore.Interfaces
             List<ColumnFilter> filters = null,
             List<KeyValuePair<string, string>> order = null,
             List<string> group = null);
+
+        bool CanPersist(T obj);
     }
 }

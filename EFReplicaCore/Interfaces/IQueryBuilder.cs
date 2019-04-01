@@ -24,5 +24,6 @@ namespace EFReplicaCore.Interfaces
         string FilterToGroup(List<string> filters);
 
         string ParseFilter(ColumnFilter filter);
+        string GetTableExistsQuery(string table);
     }
 }

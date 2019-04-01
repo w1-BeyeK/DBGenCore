@@ -7,7 +7,5 @@ namespace EFReplicaCore.Interfaces
 {
     public interface IDatabase
     {
-        Repository<Entity> GetRepository(Type T);
-        bool CreateDatabase(Type[] types);
     }
 }
