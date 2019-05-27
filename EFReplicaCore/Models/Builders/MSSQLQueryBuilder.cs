@@ -9,19 +9,19 @@ namespace EFReplicaCore.Models.Builders
 {
     public class MSSQLQueryBuilder : IQueryBuilder
     {
-        private string table;
+        public string Table { get; set; }
 
-        public MSSQLQueryBuilder(string tableName)
+        public MSSQLQueryBuilder(string table)
         {
-            table = tableName;
+            Table = table;
         }
 
         public MSSQLQueryBuilder()
         { }
 
-        public void SetTable(string table)
+        public void SetTable(string Table)
         {
-            this.table = table;
+            this.Table = Table;
         }
 
         private static Dictionary<string, string> placeHolders = new Dictionary<string, string>()
@@ -37,6 +37,23 @@ namespace EFReplicaCore.Models.Builders
             { "and", "AND" },
             { "or", "OR" }
         };
+
+        private List<string> reservedWords = new List<string>
+        {
+            "USER",
+            "PASSWORD"
+        };
+
+        protected string validatedQuery(string query)
+        {
+            foreach(string word in reservedWords)
+            {
+                if (query.ToUpper().Contains(word))
+                    query = query.ToUpper().Replace(word, $"[{word}]");
+            }
+
+            return query;
+        }
 
         #region filterparser
         public string FilterToWhere(List<ColumnFilter> filters)
@@ -114,9 +131,9 @@ namespace EFReplicaCore.Models.Builders
             string query = "";
 
             if (selects == null || selects.Count < 1)
-                query += $"{placeHolders["select"]} * from {table} ";
+                query += $"{placeHolders["select"]} * from {Table} ";
             else
-                query += $"{placeHolders["select"]} {FilterToSelect(selects)} from {table} ";
+                query += $"{placeHolders["select"]} {FilterToSelect(selects)} from {Table} ";
 
             if (filters != null && filters.Count > 0)
                 query += FilterToWhere(filters);
@@ -127,12 +144,12 @@ namespace EFReplicaCore.Models.Builders
             if (group != null && group.Count > 0)
                 query += FilterToGroup(group);
 
-            return query;
+            return validatedQuery(query);
         }
 
         public string GetInsertQuery(List<KeyValuePair<string, object>> pairs)
         {
-            string query = $"insert into {table}(@fields) values (@values)";
+            string query = $"insert into {Table}(@fields) values (@values)";
             string fields = "";
             string values = "";
 
@@ -147,12 +164,12 @@ namespace EFReplicaCore.Models.Builders
                 values += $"'{field.Value.ToString()}'";
             }
 
-            return query.Replace("@fields", fields).Replace("@values", values);
+            return validatedQuery(query.Replace("@fields", fields).Replace("@values", values));
         }
 
         public string GetDeleteQuery(List<ColumnFilter> filters)
         {
-            return $"delete from {table} {FilterToWhere(filters)}";
+            return validatedQuery($"delete from {Table} {FilterToWhere(filters)}");
         }
 
         public string GetUpdateQuery(List<KeyValuePair<string, object>> pairs, List<ColumnFilter> filters)
@@ -160,7 +177,7 @@ namespace EFReplicaCore.Models.Builders
             if (filters.Count < 1)
                 throw new ArgumentOutOfRangeException("There must be atleast 1 filter");
 
-            string query = $"{placeHolders["update"]} {table} set @fields @where";
+            string query = $"{placeHolders["update"]} {Table} set @fields @where";
             string fields = "";
 
             foreach(KeyValuePair<string, object> pair in pairs)
@@ -170,10 +187,10 @@ namespace EFReplicaCore.Models.Builders
                 fields += $"{pair.Key} = '{pair.Value}'";
             }
 
-            return query.Replace("@fields", fields).Replace("@where", FilterToWhere(filters));
+            return validatedQuery(query.Replace("@fields", fields).Replace("@where", FilterToWhere(filters)));
         }
 
-        public string GetTableExistsQuery(string table)
+        public string GetTableExistsQuery(string Table)
         {
             string query = "";
             return query;

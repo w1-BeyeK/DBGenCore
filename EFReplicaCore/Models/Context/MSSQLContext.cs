@@ -21,19 +21,21 @@ namespace EFReplicaCore.Models.Context
         protected readonly IParser parser;
 
         private readonly Converter converter = new Converter();
-        private readonly string connection;
 
-        public MSSQLContext(IQueryBuilder builder, IHandler handler, IParser parser, string conn, string table)
+        public MSSQLContext(IQueryBuilder builder, IHandler handler, IParser parser)
         {
             this.builder = builder;
             this.handler = handler;
             this.parser = parser;
-            connection = conn;
-            this.builder.SetTable(table);
         }
 
-        public MSSQLContext(string conn, string table): this(new MSSQLQueryBuilder(), new MSSQLDatabaseHandler(conn), new DataRowParser(), conn, table)
+        public MSSQLContext(string conn): this(new MSSQLQueryBuilder(), new MSSQLDatabaseHandler(conn), new DataRowParser())
         { }
+
+        protected T GetObject<T>()
+        {
+            return (T)Activator.CreateInstance(typeof(T));
+        }
 
         protected string GetTableName(T obj)
         {
@@ -42,6 +44,8 @@ namespace EFReplicaCore.Models.Context
 
         public override void DeleteInternal(T obj)
         {
+            if (string.IsNullOrEmpty(builder.Table))
+                builder.Table = GetObject<T>().GetType().Name;
 
             string query =  builder.GetDeleteQuery(converter.KeyValueToColumnFilters(obj.GetPrimaryKeyValue()));
             try
@@ -59,6 +63,9 @@ namespace EFReplicaCore.Models.Context
             List<KeyValuePair<string, string>> order = null,
             List<string> group = null)
         {
+            if (string.IsNullOrEmpty(builder.Table))
+                builder.Table = GetObject<T>().GetType().Name;
+
             try
             {
                 string query = builder.GetSelectQuery(selects, filters, order, group);
@@ -81,6 +88,9 @@ namespace EFReplicaCore.Models.Context
 
         public override void InsertInternal(T obj)
         {
+            if (string.IsNullOrEmpty(builder.Table))
+                builder.Table = GetObject<T>().GetType().Name;
+
             string query = builder.GetInsertQuery(obj.ToKeyValue(false));
             try
             {
@@ -94,9 +104,8 @@ namespace EFReplicaCore.Models.Context
 
         public override void UpdateInternal(T obj)
         {
-            List<ColumnFilter> filters = new List<ColumnFilter>();
-            //foreach (var pair in oldObj.ToKeyValue())
-            //    filters.Add(new ColumnFilter(pair.Key, pair.Value));
+            if (string.IsNullOrEmpty(builder.Table))
+                builder.Table = GetObject<T>().GetType().Name;
 
             string query = builder.GetUpdateQuery(obj.ToKeyValue(false), converter.KeyValueToColumnFilters(obj.GetPrimaryKeyValue()));
             try
@@ -117,6 +126,7 @@ namespace EFReplicaCore.Models.Context
         public bool CanPersist(T obj)
         {
             string query = builder.GetTableExistsQuery(obj.GetType().Name + "s");
+            return false;
         }
     }
 }

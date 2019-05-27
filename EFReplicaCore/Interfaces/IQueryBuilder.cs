@@ -8,6 +8,8 @@ namespace EFReplicaCore.Interfaces
 {
     public interface IQueryBuilder
     {
+        string Table { get; set; }
+
         void SetTable(string name);
 
         string GetSelectQuery(List<string> selects = null,

@@ -7,6 +7,8 @@ using EFReplicaCore.Enums;
 using EFReplicaCore.Interfaces;
 using EFReplicaCore.Models.Builders;
 using EFReplicaCore.Models.Helpers;
+using EFReplicaCore.Models.Handlers;
+using EFReplicaCore.Models.Parsers;
 
 namespace EFReplica
 {
@@ -19,15 +21,13 @@ namespace EFReplica
             // Local conn
             //string connection = "Data Source=DESKTOP-1JEGGKM\\SQLEXPRESS;Initial Catalog=DBGenCore;Integrated Security=true;";
 
-            MSSQLDatabase database = new MSSQLDatabase(connection);
-            database.AddRepository<User>();
+            IQueryBuilder builder = new MSSQLQueryBuilder();
+            IHandler handler = new MSSQLDatabaseHandler(connection);
+            IParser parser = new DataRowParser();
 
-            Repository<User> repo = database.GetRepository("UserRepository") as Repository<User>;
+            Repository<User> repo = new Repository<User>(new MSSQLContext<User>(builder, handler, parser));
 
-            MSSQLDatabase database2 = new MSSQLDatabase(connection);
-            var x = database.GetRepository("UserRepository") as Repository<User>;
-
-            // Insert test
+            //// Insert test
             repo.Insert(new User()
             {
                 Name = "TEST USER 2.0 AAAA",

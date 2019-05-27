@@ -10,6 +10,29 @@ using System.Text;
 
 namespace EFReplicaCore.Models
 {
+    /// <summary>
+    /// Generic repository used to map objects to the database - and vice versa
+    /// </summary>
+    /// <typeparam name="T">Used model type, must inherit from Entity</typeparam>
+    /// <example>
+    /// To make use of this class you need at least 1 model inheriting from
+    /// entity. Which you can then pass along in the following way:
+    /// <code>
+    /// Repository&lt;User&gt; userRepository
+    ///     = new Repository&lt;User&gt;();
+    /// </code>
+    /// <para>
+    /// The Repository class knows only the basic CRUD methods, which you can override
+    /// and update as you like.
+    /// <code>
+    /// void Insert(T obj);
+    /// void Update(T obj);
+    /// void Delete(T obj);
+    /// T GetById(long id);
+    /// List&lt;T&gt; GetAll();
+    /// </code>
+    /// </para>
+    /// </example>
     public class Repository<T> where T : Entity
     {
         private readonly IContext<T> context;

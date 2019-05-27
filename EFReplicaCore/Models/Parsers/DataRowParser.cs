@@ -1,4 +1,5 @@
 ﻿using EFReplicaCore.Attributes;
+using EFReplicaCore.Enums;
 using EFReplicaCore.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -21,9 +22,23 @@ namespace EFReplicaCore.Models.Parsers
             DataRow dr = (raw as DataRow);
             foreach (DataColumn col in dr.Table.Columns)
             {
+                if (string.IsNullOrEmpty(dr[col].ToString()))
+                    continue;
+
                 if (result.HasProperty(col.ColumnName) && Attribute.IsDefined(result.GetPropertyByName(col.ColumnName), typeof(Property)))
                 {
-                    result.SetPropertyByName(col.ColumnName, dr[col]);
+                    DataType type = ((Property)Attribute.GetCustomAttributes(result.GetPropertyByName(col.ColumnName), typeof(Property))[0]).DataType;
+                    object value;
+                    switch (type)
+                    {
+                        case DataType.DateTime:
+                            value = DateTime.Parse(dr[col].ToString());
+                            break;
+                        default:
+                            value = dr[col];
+                            break;
+                    }
+                    result.SetPropertyByName(col.ColumnName, value);
                 }
             }
 

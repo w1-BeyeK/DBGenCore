@@ -5,9 +5,41 @@ using System.Reflection;
 
 namespace EFReplicaCore.Models
 {
+    /// <summary>
+    /// Class which is primarily used for this ORM
+    /// </summary>
+    /// <example>
+    /// <list type="bullet">
+    /// <item>
+    /// <description>Maps all properties to key-value pairs
+    /// <code>
+    /// Entity entity;
+    /// entity.GetProperties();
+    /// </code>
+    /// </description>
+    /// </item>
+    /// <item>
+    /// <description>Gets primary key value based on defined attributes
+    /// <code>
+    /// Entity entity;
+    /// entity.GetPrimaryKeyValue();
+    /// </code>
+    /// </description>
+    /// </item>
+    /// <item>
+    /// <description>Can get and set property by name
+    /// <code>
+    /// Entity entity;
+    /// var prop = entity.GetPropertyByName("Name"); // results in PropertyInfo object
+    /// entity.SetPropertyByName("Name, "Random person...");
+    /// </code>
+    /// </description>
+    /// </item>
+    /// </list>
+    /// </example>
     public abstract class Entity
     {
-        public bool IsValid()
+        public virtual bool IsValid()
         {
             return true;
         }
@@ -30,8 +62,6 @@ namespace EFReplicaCore.Models
 
         public List<KeyValuePair<string, object>> ToKeyValue(bool includeKeys = true)
         {
-            Dictionary<string, object> x = new Dictionary<string, object>();
-            x.Add("column", "value");
             List<KeyValuePair<string, object>> items = new List<KeyValuePair<string, object>>();
             foreach (PropertyInfo prop in GetType().GetProperties())
             {
@@ -93,11 +123,10 @@ namespace EFReplicaCore.Models
         
         private IEnumerable<PropertyInfo> GetPropsWithAttribute(Type type)
         {
-            return new List<PropertyInfo>(GetType().GetProperties()).FindAll(t => Attribute.IsDefined(t, type));
             // Create new list based on all properties
             return new List<PropertyInfo>(GetType().GetProperties())
                 // Then search for the required attribute
-                .FindAll(t => Attribute.IsDefined(t, typeof(Type)));
+                .FindAll(t => Attribute.IsDefined(t, type));
         }
     }
 }
